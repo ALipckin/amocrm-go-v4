@@ -97,6 +97,8 @@ type Client struct {
 	Webhooks  *WebhooksService
 	Catalogs  *CatalogsService
 	Auth      *AuthService
+	Users     *UserService
+	Roles     *RoleService
 }
 
 // AuthType represents the type of authentication
@@ -242,6 +244,8 @@ func NewClient(opts ...ClientOption) *Client {
 	client.Webhooks = &WebhooksService{client: client}
 	client.Catalogs = &CatalogsService{client: client}
 	client.Auth = &AuthService{client: client}
+	client.Users = &UserService{client: client}
+	client.Roles = &RoleService{client: client}
 
 	// Load token if using OAuth2
 	if client.authType == AuthTypeOAuth2 && client.tokenStorage != nil {
