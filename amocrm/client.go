@@ -438,6 +438,10 @@ func (c *Client) GetJSON(ctx context.Context, path string, result interface{}) e
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusNoContent {
+		return nil
+	}
+
 	return json.NewDecoder(resp.Body).Decode(result)
 }
 
