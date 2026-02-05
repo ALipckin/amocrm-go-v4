@@ -35,8 +35,9 @@ type Task struct {
 }
 
 // TaskResult represents task completion result
+// Handles both object {"text": "..."} and array [{"text": "..."}] formats from API
 type TaskResult struct {
-	Text string `json:"text,omitempty"`
+	Text string
 }
 
 // TasksService handles communication with task-related methods
