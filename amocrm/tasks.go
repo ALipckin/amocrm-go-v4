@@ -2,6 +2,7 @@ package amocrm
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 )
 
@@ -38,6 +39,59 @@ type Task struct {
 // Handles both object {"text": "..."} and array [{"text": "..."}] formats from API
 type TaskResult struct {
 	Text string
+}
+
+// UnmarshalJSON implements custom unmarshaling to handle multiple API formats:
+// - Object: {"text": "some text"}
+// - Array with data: [{"text": "some text"}]
+// - Empty array: []
+// - Empty object: {}
+func (tr *TaskResult) UnmarshalJSON(data []byte) error {
+	if len(data) == 0 {
+		tr.Text = ""
+		return nil
+	}
+
+	// Check if it's an array
+	if data[0] == '[' {
+		type taskResultAlias struct {
+			Text string `json:"text"`
+		}
+
+		var arrResult []taskResultAlias
+		if err := json.Unmarshal(data, &arrResult); err != nil {
+			return err
+		}
+
+		// Handle empty array or take first element
+		if len(arrResult) > 0 {
+			tr.Text = arrResult[0].Text
+		} else {
+			tr.Text = ""
+		}
+		return nil
+	}
+
+	// Handle object format
+	type taskResultAlias struct {
+		Text string `json:"text"`
+	}
+
+	var objResult taskResultAlias
+	if err := json.Unmarshal(data, &objResult); err != nil {
+		return err
+	}
+
+	tr.Text = objResult.Text
+	return nil
+}
+
+// MarshalJSON implements custom marshaling to always output as object format
+func (tr TaskResult) MarshalJSON() ([]byte, error) {
+	type taskResultAlias struct {
+		Text string `json:"text"`
+	}
+	return json.Marshal(taskResultAlias{Text: tr.Text})
 }
 
 // TasksService handles communication with task-related methods
